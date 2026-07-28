@@ -1,0 +1,26 @@
+/ai-job-search-master/
+/.superpowers/
+
+# Local candidate sources and generated application materials.
+documents/**
+!documents/
+!documents/README.md
+!documents/templates/
+!documents/templates/**
+generated/
+generated-resumes/
+generated-cover-letters/
+
+# Local search state and scraper cache.
+job_search_tracker.csv
+job_scraper/**
+
+# Future local email-content storage.
+mail/**
+
+# Runtime state and secrets.
+runtime/
+__pycache__/
+.env
+.env.*
+!.env.example
