@@ -2,15 +2,15 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use `subagent-driven-development` (recommended) or `executing-plans` to implement this plan task-by-task. Steps use checkbox syntax for tracking.
 
-**Goal:** Build a Codex-native, manually triggered MVP that searches public Zhilianshaopin listings for junior technical product-manager roles in Zhejiang, ranks them against the confirmed candidate profile, and generates user-approved DOCX and PDF application materials locally.
+**Goal:** Build a Codex-native, manually triggered MVP that accepts user-supplied Zhilianshaopin URLs or pasted job text for junior technical product-manager roles in Zhejiang, ranks them against the confirmed candidate profile, and generates user-approved DOCX and PDF application materials locally.
 
-**Architecture:** Keep the reference project's portable Bun portal-CLI contract, local JSON/CSV/Markdown state, candidate-profile workflow, two-stage search/rank flow, and factual-review gates. Add a small shared normalization/state layer, one `ZhilianAdapter`, and a Python document renderer; translate Claude Code-specific orchestration into Codex project guidance and a portable local skill.
+**Architecture:** Keep the reference project's local JSON/CSV/Markdown state, candidate-profile workflow, two-stage search/rank flow, and factual-review gates. Add a small shared normalization/state layer, a manual Zhilian intake normalizer, and a Python document renderer; translate Claude Code-specific orchestration into Codex project guidance and a portable local skill. Do not add a live portal fetcher unless written platform permission or an approved public API is obtained.
 
-**Tech Stack:** Codex workflow instructions, Bun + TypeScript for the portal CLI, Python 3.10+ for local state/document helpers, `python-docx` for DOCX output, LibreOffice `soffice --headless` for PDF conversion, JSON/CSV/Markdown for local state, fixture tests plus bounded live smoke tests.
+**Tech Stack:** Codex workflow instructions, Python 3.10+ for local intake/state/document helpers, `python-docx` for DOCX output, LibreOffice `soffice --headless` for PDF conversion, JSON/CSV/Markdown for local state, and offline fixture tests. No live smoke test is permitted under the current Zhilian access decision.
 
 ## Global Constraints
 
-- The first release targets only public, read-only Zhilianshaopin search/detail access; it must stop on login, CAPTCHA, SMS verification, or anti-bot pages.
+- The first release accepts only user-supplied Zhilian URLs or pasted visible job text; it does not fetch search/detail pages. If a user manually inspects a page, they must stop on login, CAPTCHA, SMS verification, or anti-bot pages.
 - The first release is manually triggered; no scheduler, daemon, browser automation, upload, submission, chat, reply, or platform write operation is allowed.
 - The first release targets junior product-manager roles in Zhejiang, prioritizing Lishui, then Hangzhou/Jinhua, then other Zhejiang cities.
 - The hard exclusions are labor dispatch and outsourcing; salary has no hard floor and is shown as a ranking reference only.
@@ -150,61 +150,47 @@ The project root is the new implementation target. The ignored `ai-job-search-ma
 
   Expected: PASS only when the access decision and parsing anchors are complete. If the result is no-go, stop the portal implementation and revise the MVP to use user-supplied posting URLs or an approved public source; do not bypass the restriction.
 
-### Task 4: Implement the Zhilianshaopin Read-Only CLI
+### Task 4: Implement Manual Zhilianshaopin Intake
 
 **Files:**
 - Create: `.agents/skills/zhaopin-search/SKILL.md`
 - Create: `.agents/skills/zhaopin-search/url-reference.md`
-- Create: `.agents/skills/zhaopin-search/cli/package.json`
-- Create: `.agents/skills/zhaopin-search/cli/tsconfig.json`
-- Create: `.agents/skills/zhaopin-search/cli/README.md`
-- Create: `.agents/skills/zhaopin-search/cli/src/cli.ts`
-- Create: `.agents/skills/zhaopin-search/cli/src/helpers.ts`
-- Create: `.agents/skills/zhaopin-search/cli/src/commands/search.ts`
-- Create: `.agents/skills/zhaopin-search/cli/src/commands/detail.ts`
-- Create: `.agents/skills/zhaopin-search/cli/tests/helpers.ts`
-- Create: `.agents/skills/zhaopin-search/cli/tests/parsing.test.ts`
-- Create: `.agents/skills/zhaopin-search/cli/tests/cli-contract.test.ts`
-- Create: `.agents/skills/zhaopin-search/cli/tests/request-timeout.test.ts`
+- Create: `tools/normalize_manual_job.py`
+- Create: `tests/test_manual_job_intake.py`
 
 **Interfaces:**
-- CLI: `bun run src/cli.ts search --query <text> --location <text> --jobage <days> --page <n> --limit <n> --format json|table|plain`.
-- CLI: `bun run src/cli.ts detail <id|url> --format json|plain`.
-- JSON search output: `{ "meta": { "count": number, "page": number }, "results": JobSummary[] }`.
+- Manual intake accepts one user-supplied URL plus pasted visible job text and emits one normalized `JobSummary`.
 - `JobSummary` fields: `id`, `title`, `company`, `location`, `salary`, `experience`, `education`, `date`, `url`, and `source`.
-- Errors go to stderr as JSON with `error` and `code`; stdout remains machine-readable output.
+- The normalizer performs no network access, never follows instructions embedded in job text, and records `source: zhaopin_manual`.
+- Missing fields remain `null` and the original user-supplied text is kept local for review.
 
-- [ ] **Step 1: Copy the contract test harness from the reference CLI pattern**
+- [ ] **Step 1: Write manual-intake contract tests**
 
-  Reuse the `runCLI` and JSON parsing test shape from `ai-job-search-master/.agents/skills/jobindex-search/cli/tests/helpers.ts`, adapting only the path and command name.
+  Cover one pasted posting, explicit URL preservation, Chinese text, missing optional fields, malformed input, and the guarantee that the normalizer performs no network access.
 
-- [ ] **Step 2: Write parser fixture tests**
+- [ ] **Step 2: Add redacted local fixtures**
 
-  Add tests for one captured search response, one captured detail response, missing salary, Chinese text/entity decoding, malformed cards, and detail-not-found behavior.
+  Use synthetic/redacted job text only. Do not save copied live Zhilian HTML or response bodies under the current `MANUAL_URL_ONLY` decision.
 
-- [ ] **Step 3: Run the Bun tests**
+- [ ] **Step 3: Run the focused Python tests**
 
-  Run: `bun test --cwd .agents/skills/zhaopin-search/cli`
+  Run: `python -m unittest tests.test_manual_job_intake -v`
 
-  Expected: FAIL because the CLI and parsers are not implemented.
+  Expected: FAIL because the local normalizer is not implemented.
 
-- [ ] **Step 4: Implement the minimal read-only CLI**
+- [ ] **Step 4: Implement the local normalizer**
 
-  Follow the reference portal contract: `fetch` with a browser-like user agent, a 15-second abort signal, bounded retry for 429/5xx, `null` for unavailable optional fields, per-result parsing isolation, and no authenticated request headers.
+  Parse only user-supplied text and URL. Use deterministic labels and conservative nulls; never fetch the URL, use browser automation, add authentication headers, or infer facts that are not present in the supplied text.
 
-- [ ] **Step 5: Run typecheck and fixture tests**
+- [ ] **Step 5: Run the focused tests**
 
-  Run: `bun run --cwd .agents/skills/zhaopin-search/cli typecheck`
+  Run: `python -m unittest tests.test_manual_job_intake -v`
 
-  Expected: PASS with no TypeScript errors.
+  Expected: PASS with all local intake tests passing.
 
-  Run: `bun test --cwd .agents/skills/zhaopin-search/cli`
+- [ ] **Step 6: Verify the manual acceptance path**
 
-  Expected: PASS with all fixture and contract tests passing.
-
-- [ ] **Step 6: Run one bounded live smoke test**
-
-  Run the documented junior technical-product query with `--limit 3 --format json`, then run `detail` on one returned ID. Confirm populated title/company/URL fields and readable description. Do not use the live request in CI and stop immediately on login/CAPTCHA/rate-limit evidence.
+  Manually open a Zhilian page, copy only the visible posting text, run local intake, and confirm URL/title/company fields before ranking. Do not automate the page request or save raw platform HTML.
 
 ### Task 5: Add Shared Job State and Deterministic Hard Filters
 
@@ -256,7 +242,7 @@ The project root is the new implementation target. The ignored `ai-job-search-ma
 - Create: `tests/test_workflow_contract.py`
 
 **Interfaces:**
-- `scrape` reads query configuration, invokes the Zhilian CLI, calls `merge_seen_jobs`, and presents new jobs without generating application materials.
+- `scrape` accepts a user-supplied posting URL and pasted text, calls the local normalizer and `merge_seen_jobs`, and presents new jobs without generating application materials.
 - `rank` reads unseen jobs and the confirmed profile, applies `apply_hard_filters`, and produces a ranked JSON/Markdown shortlist with score, city tier, direction match, gaps, flags, and URL.
 - `apply` accepts one selected job key/URL, requests user confirmation before drafting, and passes a single job plus confirmed profile to the material workflow.
 - `outcome` records manual submission results and never calls a platform write operation.
@@ -379,7 +365,7 @@ The project root is the new implementation target. The ignored `ai-job-search-ma
 
 **Interfaces:**
 - README documents manual Codex triggers, prerequisites, local-only data rules, the public-read-only platform boundary, and the current MVP limitations.
-- CI runs offline Python tests and Bun fixture/typecheck tests; it does not call Zhilianshaopin or any live mailbox.
+- CI runs offline Python tests and any local fixture tests; it does not call Zhilianshaopin or any live mailbox.
 
 - [ ] **Step 1: Write the final MVP contract tests**
 
@@ -390,14 +376,6 @@ The project root is the new implementation target. The ignored `ai-job-search-ma
   Run: `python -m unittest discover -s tests -v`
 
   Expected: PASS for all Python tests.
-
-  Run: `bun test --cwd .agents/skills/zhaopin-search/cli`
-
-  Expected: PASS for all fixture tests.
-
-  Run: `bun run --cwd .agents/skills/zhaopin-search/cli typecheck`
-
-  Expected: PASS with no TypeScript errors.
 
 - [ ] **Step 3: Run the manual end-to-end acceptance flow**
 
@@ -417,7 +395,7 @@ The project root is the new implementation target. The ignored `ai-job-search-ma
 
 ## Plan Self-Review
 
-- Spec coverage: candidate ingestion, Codex workflow, Zhilianshaopin access gate, read-only CLI, normalization, hard filters, two-stage ranking, DOCX/PDF generation, user confirmations, local archive, tests, and MVP acceptance each have dedicated tasks.
+- Spec coverage: candidate ingestion, Codex workflow, Zhilianshaopin access gate, manual intake, normalization, hard filters, two-stage ranking, DOCX/PDF generation, user confirmations, local archive, tests, and MVP acceptance each have dedicated tasks.
 - Placeholder scan: no `TODO`, `TBD`, `待定`, or unspecified implementation placeholder is used; the Zhilianshaopin access decision is an explicit go/no-go gate with a defined stop/fallback behavior.
 - Type consistency: `JobSummary`, `CandidateProfile`, `ApplicationDraft`, `ApplicationBundle`, `FilterResult`, `ArchiveRecord`, and all referenced function names are defined at their first use and reused consistently.
 - Dependency risk: `python-docx` and LibreOffice are named as prerequisites and require authorization before installation; no dependency installation is included in this plan.
