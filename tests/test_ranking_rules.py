@@ -1,7 +1,7 @@
 import unittest
 
 
-from src.ranking_rules import apply_hard_filters, location_tier
+from src.ranking_rules import apply_hard_filters, location_tier, direction_score, rank_jobs
 
 
 PROFILE = {
@@ -82,6 +82,44 @@ class RankingRuleTests(unittest.TestCase):
         self.assertFalse(result.passed)
         self.assertEqual(result.location_tier, "outside")
         self.assertIn("location_outside_zhejiang", result.reasons)
+
+
+class DirectionScoreTests(unittest.TestCase):
+    """方向匹配评分测试。"""
+
+    def _job(self, title, desc="", tags=""):
+        return {"title": title, "description": desc, "tags": tags}
+
+    def test_communication_hardware_scores_high(self):
+        score = direction_score(
+            self._job("通信产品经理", "负责5G通信产品规划，物联网方案设计")
+        )
+        self.assertGreaterEqual(score, 70)
+
+    def test_pet_product_scores_low(self):
+        score = direction_score(
+            self._job("宠物产品经理", "负责宠物食品产品设计")
+        )
+        self.assertLess(score, 55)
+
+    def test_construction_scores_low(self):
+        score = direction_score(
+            self._job("工程施工项目经理", "负责建筑施工管理")
+        )
+        self.assertLess(score, 40)
+
+    def test_ai_product_scores_high(self):
+        score = direction_score(
+            self._job("AI产品经理", "大模型产品规划，智能硬件")
+        )
+        self.assertGreaterEqual(score, 70)
+
+    def test_generic_pm_scores_mid(self):
+        score = direction_score(
+            self._job("产品经理", "负责产品规划和需求分析")
+        )
+        self.assertGreaterEqual(score, 55)
+        self.assertLessEqual(score, 85)
 
 
 if __name__ == "__main__":

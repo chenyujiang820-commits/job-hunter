@@ -14,6 +14,7 @@ class ManualJobIntakeTests(unittest.TestCase):
 薪资：8-12K·13薪
 经验：1-3年
 学历：本科
+职位标签：需求分析、产品设计、物联网
 发布日期：2026-07-28
 职位描述：负责物联网产品规划、需求分析和政企解决方案。
 """
@@ -31,6 +32,7 @@ class ManualJobIntakeTests(unittest.TestCase):
         self.assertEqual(result["salary"]["unit"], "month")
         self.assertEqual(result["experience"], "1-3年")
         self.assertEqual(result["education"], "本科")
+        self.assertEqual(result["tags"], "需求分析、产品设计、物联网")
         self.assertEqual(result["date"], "2026-07-28")
         self.assertEqual(result["source"], "zhaopin_manual")
         self.assertEqual(result["url"], url)
@@ -48,6 +50,7 @@ class ManualJobIntakeTests(unittest.TestCase):
         self.assertIsNone(result["salary"])
         self.assertIsNone(result["experience"])
         self.assertIsNone(result["education"])
+        self.assertIsNone(result["tags"])
         self.assertIsNone(result["date"])
 
     def test_derives_stable_manual_id_when_url_has_no_job_id(self):

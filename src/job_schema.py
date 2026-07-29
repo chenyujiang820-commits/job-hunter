@@ -20,6 +20,7 @@ class JobSummary(TypedDict, total=False):
     salary: Salary | None
     experience: str | None
     education: str | None
+    tags: str | None
     date: str | None
     url: str | None
     source: str | None

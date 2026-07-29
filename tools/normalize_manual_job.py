@@ -20,13 +20,14 @@ LABELS = {
     "education": ("学历要求", "学历", "教育程度"),
     "date": ("发布日期", "发布时间", "更新时间", "更新日期"),
     "description": ("职位描述", "岗位职责", "工作内容", "职位详情"),
+    "tags": ("职位标签", "技能标签", "职位亮点", "标签"),
 }
 
 _LABEL_PATTERN = re.compile(
     r"^\s*(?P<label>职位名称|岗位名称|职位|岗位|公司名称|公司|招聘企业|企业|"
     r"工作地点|地点|工作城市|城市|薪资范围|薪资|薪酬|工资|工作经验|经验要求|经验|"
     r"学历要求|学历|教育程度|发布日期|发布时间|更新时间|更新日期|职位描述|岗位职责|"
-    r"工作内容|职位详情)\s*[:：]\s*(?P<value>.*)\s*$"
+    r"工作内容|职位详情|职位标签|技能标签|职位亮点|标签)\s*[:：]\s*(?P<value>.*)\s*$"
 )
 
 
@@ -151,6 +152,7 @@ def normalize_manual_job(url: str, text: str) -> dict[str, Any]:
         "url": url.strip(),
         "source": "zhaopin_manual",
         "description": sections.get("description"),
+        "tags": sections.get("tags"),
         "raw_text": text,
     }
 

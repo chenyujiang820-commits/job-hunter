@@ -10,7 +10,7 @@
 
 ## Global Constraints
 
-- The first release accepts only user-supplied Zhilian URLs or pasted visible job text; it does not fetch search/detail pages. If a user manually inspects a page, they must stop on login, CAPTCHA, SMS verification, or anti-bot pages.
+- The first release accepts user-supplied Zhilian URLs or pasted visible job text, and supports locally triggered read-only Zhilian HTTP and BOSS CDP collection. Login, CAPTCHA, SMS verification, rate-limit, and anti-bot responses become an explicit manual-intervention pause.
 - The first release is manually triggered; no scheduler, daemon, browser automation, upload, submission, chat, reply, or platform write operation is allowed.
 - The first release targets junior product-manager roles in Zhejiang, prioritizing Lishui, then Hangzhou/Jinhua, then other Zhejiang cities.
 - The hard exclusions are labor dispatch and outsourcing; salary has no hard floor and is shown as a ranking reference only.
@@ -150,7 +150,7 @@ The project root is the new implementation target. The ignored `ai-job-search-ma
 
   Expected: PASS only when the access decision and parsing anchors are complete. If the result is no-go, stop the portal implementation and revise the MVP to use user-supplied posting URLs or an approved public source; do not bypass the restriction.
 
-### Task 4: Implement Manual Zhilianshaopin Intake
+### Task 4: Implement Zhilian Intake and Read-Only Collection
 
 **Files:**
 - Create: `.agents/skills/zhaopin-search/SKILL.md`
@@ -160,8 +160,9 @@ The project root is the new implementation target. The ignored `ai-job-search-ma
 
 **Interfaces:**
 - Manual intake accepts one user-supplied URL plus pasted visible job text and emits one normalized `JobSummary`.
+- The read-only Zhilian crawler accepts keyword/city/page input and emits the same `JobSummary`; BOSS uses a separate read-only CDP adapter.
 - `JobSummary` fields: `id`, `title`, `company`, `location`, `salary`, `experience`, `education`, `date`, `url`, and `source`.
-- The normalizer performs no network access, never follows instructions embedded in job text, and records `source: zhaopin_manual`.
+- The normalizer performs no network access, never follows instructions embedded in job text, and records `source: zhaopin_manual`. Crawler access failures return a manual-intervention pause instead of silent empty success.
 - Missing fields remain `null` and the original user-supplied text is kept local for review.
 
 - [ ] **Step 1: Write manual-intake contract tests**
@@ -389,9 +390,9 @@ The project root is the new implementation target. The ignored `ai-job-search-ma
 
 - QQ IMAP/POP3 implementation; it receives a separate second-phase plan after the MVP is stable.
 - 163 and enterprise-mail adapters.
-- BOSS, Liepin, and 51job adapters.
+- Liepin and 51job adapters.
 - Notion or other external synchronization implementation.
-- Web UI, scheduler, daemon, browser extension, platform login, platform upload, platform submission, chat, reply, and CAPTCHA handling.
+- Web UI, scheduler, daemon, browser extension, platform upload, platform submission, chat, reply, CAPTCHA solving/bypass, and mailbox synchronization.
 
 ## Plan Self-Review
 

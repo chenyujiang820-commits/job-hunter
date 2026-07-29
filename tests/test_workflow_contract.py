@@ -38,7 +38,7 @@ class WorkflowContractTests(unittest.TestCase):
             "pasted visible job text",
             "tools/normalize_manual_job.py",
             "merge_seen_jobs",
-            "Do not fetch the URL",
+            "read-only HTTP requests",
             "Do not submit",
         ):
             with self.subTest(marker=marker):
@@ -111,9 +111,10 @@ class WorkflowContractTests(unittest.TestCase):
 
     def test_project_contract_keeps_manual_only_boundary(self):
         for marker in (
-            "manually triggered",
+            "locally triggered",
+            "manually pasted",
             "Do not schedule work or run a daemon",
-            "browser automation",
+            "rowser automation",
             "platform write operations",
             "candidate data",
         ):

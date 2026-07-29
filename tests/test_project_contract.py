@@ -33,10 +33,11 @@ class ProjectContractTests(unittest.TestCase):
         agents = (ROOT / "AGENTS.md").read_text()
 
         required_phrases = (
-            "The MVP uses only manually triggered, public, read-only Zhilian search and detail access",
-            "Stop immediately on login, CAPTCHA, SMS verification, or anti-bot pages",
+            "locally triggered Zhilian search and detail access",
+            "read-only HTTP requests via `curl_cffi`",
+            "pause and ask the user to intervene manually",
             "Do not schedule work or run a daemon",
-            "browser automation",
+            "Browser automation",
             "uploads",
             "submissions",
             "chat",
