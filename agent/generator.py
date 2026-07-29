@@ -16,9 +16,10 @@ def generate_resume(
     job_desc: str,
     fit_summary: str = "",
     improvements: list[str] | None = None,
+    profile_data: dict | None = None,
 ) -> str:
     """生成简历 Markdown。"""
-    profile = get_profile()
+    profile = profile_data or get_profile()
 
     # 技能列表
     skills = profile.get("skills", [])
@@ -65,9 +66,10 @@ def generate_cover_letter(
     job_desc: str,
     fit_summary: str = "",
     improvements: list[str] | None = None,
+    profile_data: dict | None = None,
 ) -> str:
     """生成求职信 Markdown。"""
-    profile = get_profile()
+    profile = profile_data or get_profile()
 
     letter_prompt = f"""写一封 200-300 字中文求职信。
 候选人:通信工程本科，共产党员，求职{job_title}@{company}。

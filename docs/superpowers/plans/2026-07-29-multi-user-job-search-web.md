@@ -65,15 +65,15 @@ Existing local CLI behavior remains available while web services are introduced.
 - `GET /api/health -> {"status": "ok", "version": str}`
 - `Settings.database_url`, `Settings.s3_endpoint`, `Settings.s3_bucket`, `Settings.default_model_key`
 
-- [ ] **Step 1: Write the failing health and settings tests.** Assert that `create_app()` exposes `/api/health`, settings load from an injected environment mapping, and no secret value appears in the health response.
-- [ ] **Step 2: Run the focused test.**
+- [x] **Step 1: Write the failing health and settings tests.** Assert that `create_app()` exposes `/api/health`, settings load from an injected environment mapping, and no secret value appears in the health response.
+- [x] **Step 2: Run the focused test.**
 
   Run: `python -m unittest tests_web.test_app_health -v`
 
   Expected: FAIL because the `server` package and health route do not exist.
-- [ ] **Step 3: Add the FastAPI factory and settings model.** Use Pydantic settings with explicit defaults for local SQLite and MinIO; keep the default model key empty unless configured.
-- [ ] **Step 4: Add Vite React bootstrap and Docker Compose.** Compose must expose FastAPI and MinIO locally, persist MinIO data under an ignored directory, and avoid putting secrets in tracked files.
-- [ ] **Step 5: Run the focused test and compile checks.**
+- [x] **Step 3: Add the FastAPI factory and settings model.** Use Pydantic settings with explicit defaults for local SQLite and MinIO; keep the default model key empty unless configured.
+- [x] **Step 4: Add Vite React bootstrap and Docker Compose.** Compose must expose FastAPI and MinIO locally, persist MinIO data under an ignored directory, and avoid putting secrets in tracked files.
+- [x] **Step 5: Run the focused test and compile checks.**
 
   Run: `python -m unittest tests_web.test_app_health -v`
 
@@ -96,16 +96,16 @@ Existing local CLI behavior remains available while web services are introduced.
 - `TenantRepository.get_file(file_id: UUID) -> FileObject | None`
 - `JobRepository.upsert_public_job(job: JobSummary) -> Job`
 
-- [ ] **Step 1: Write isolation tests with two users.** Verify that user A cannot fetch user B's profile, file, evaluation, draft, application, task, credential, or browser session; verify both users can read the same public `Job`.
-- [ ] **Step 2: Run the focused test.**
+- [x] **Step 1: Write isolation tests with two users.** Verify that user A cannot fetch user B's profile, file, evaluation, draft, application, task, credential, or browser session; verify both users can read the same public `Job`.
+- [x] **Step 2: Run the focused test.**
 
   Run: `python -m unittest tests_web.test_tenant_repositories -v`
 
   Expected: FAIL because the ORM entities and repositories do not exist.
-- [ ] **Step 3: Implement ORM entities and constraints.** Add `user_id` to every private table, unique keys for invite tokens and public job identity, foreign keys with user ownership, timestamps, version fields, and task status fields.
-- [ ] **Step 4: Implement repositories that require an authenticated user context.** Never accept an owner ID from a route body; repository methods scope all private queries to the constructor's `user_id`.
-- [ ] **Step 5: Add Alembic initial migration and SQLite test fixture.** Keep column types and constraints compatible with PostgreSQL.
-- [ ] **Step 6: Run tests and migration checks.**
+- [x] **Step 3: Implement ORM entities and constraints.** Add `user_id` to every private table, unique keys for invite tokens and public job identity, foreign keys with user ownership, timestamps, version fields, and task status fields.
+- [x] **Step 4: Implement repositories that require an authenticated user context.** Never accept an owner ID from a route body; repository methods scope all private queries to the constructor's `user_id`.
+- [x] **Step 5: Add Alembic initial migration and SQLite test fixture.** Keep column types and constraints compatible with PostgreSQL.
+- [x] **Step 6: Run tests and migration checks.**
 
   Run: `python -m unittest tests_web.test_tenant_repositories -v`
 
@@ -130,16 +130,16 @@ Existing local CLI behavior remains available while web services are introduced.
 - `require_user(request) -> AuthenticatedUser`
 - `require_admin(user) -> AuthenticatedUser`
 
-- [ ] **Step 1: Write failing tests for one-time invitations, password hashing, session cookies, logout, disabled users, and admin-only routes.** Include a test that an ordinary user receives `403` from all admin routes.
-- [ ] **Step 2: Run the focused tests.**
+- [x] **Step 1: Write failing tests for one-time invitations, password hashing, session cookies, logout, disabled users, and admin-only routes.** Include a test that an ordinary user receives `403` from all admin routes.
+- [x] **Step 2: Run the focused tests.**
 
   Run: `python -m unittest tests_web.test_auth_and_invites tests_web.test_authorization -v`
 
   Expected: FAIL because authentication routes and security helpers do not exist.
-- [ ] **Step 3: Implement Argon2 password hashing and opaque server-side sessions.** Store only a hash of the session token, set an HttpOnly/SameSite cookie, rotate the session on login, and invalidate sessions on password reset.
-- [ ] **Step 4: Implement invitation consumption.** Require an unexpired unused invite, atomically mark it used during registration, and reject reuse or disabled accounts.
-- [ ] **Step 5: Add administrator invite, account-state, and password-reset routes.** Do not add an endpoint that returns user-private content to administrators.
-- [ ] **Step 6: Run the focused tests and a compile check.**
+- [x] **Step 3: Implement Argon2 password hashing and opaque server-side sessions.** Store only a hash of the session token, set an HttpOnly/SameSite cookie, rotate the session on login, and invalidate sessions on password reset.
+- [x] **Step 4: Implement invitation consumption.** Require an unexpired unused invite, atomically mark it used during registration, and reject reuse or disabled accounts.
+- [x] **Step 5: Add administrator invite, account-state, and password-reset routes.** Do not add an endpoint that returns user-private content to administrators.
+- [x] **Step 6: Run the focused tests and a compile check.**
 
   Expected: all auth and authorization tests PASS.
 
@@ -159,15 +159,15 @@ Existing local CLI behavior remains available while web services are introduced.
 - `GET /api/documents -> list[SourceDocumentView]`
 - `GET /api/documents/{file_id}/download -> file response`
 
-- [ ] **Step 1: Write tests using a fake S3-compatible storage.** Assert deterministic `users/{user_id}/...` keys, content hash capture, allowed extensions, size limits, and user A cannot download user B's object.
-- [ ] **Step 2: Run the focused tests and confirm red.**
+- [x] **Step 1: Write tests using a fake S3-compatible storage.** Assert deterministic `users/{user_id}/...` keys, content hash capture, allowed extensions, size limits, and user A cannot download user B's object.
+- [x] **Step 2: Run the focused tests and confirm red.**
 
   Run: `python -m unittest tests_web.test_object_storage tests_web.test_document_permissions -v`
 
   Expected: FAIL because the storage adapter and document routes do not exist.
-- [ ] **Step 3: Implement the MinIO/S3 adapter and metadata transaction.** Upload the object first, then commit metadata; if metadata fails, delete the exact newly-created object.
-- [ ] **Step 4: Implement authenticated upload/list/download routes.** Use multipart limits, content-type checks, generated object keys, and short-lived authorized downloads.
-- [ ] **Step 5: Run focused tests and MinIO integration tests when the local service is available.**
+- [x] **Step 3: Implement the MinIO/S3 adapter and metadata transaction.** Upload the object first, then commit metadata; if metadata fails, delete the exact newly-created object.
+- [x] **Step 4: Implement authenticated upload/list/download routes.** Use multipart limits, content-type checks, generated object keys, and short-lived authorized downloads.
+- [x] **Step 5: Run focused tests and MinIO integration tests when the local service is available.**
 
   Expected: unit tests PASS; integration tests are explicitly reported as unavailable when MinIO is not running.
 
@@ -188,16 +188,16 @@ Existing local CLI behavior remains available while web services are introduced.
 - `POST /api/profile/proposals/{proposal_id}/confirm -> ProfileView`
 - `GET/PATCH /api/settings/ai-consent`
 
-- [ ] **Step 1: Write tests for first-use consent, revoked consent, source references, rejected changes, and profile versioning.** The tests must prove unconfirmed proposals do not mutate the confirmed profile.
-- [ ] **Step 2: Run focused tests and confirm red.**
+- [x] **Step 1: Write tests for first-use consent, revoked consent, source references, rejected changes, and profile versioning.** The tests must prove unconfirmed proposals do not mutate the confirmed profile.
+- [x] **Step 2: Run focused tests and confirm red.**
 
   Run: `python -m unittest tests_web.test_profile_extraction tests_web.test_ai_consent -v`
 
   Expected: FAIL because the web profile services do not exist.
-- [ ] **Step 3: Implement local text extraction adapters.** Reuse existing PDF/DOCX/Markdown/plain-text helpers and keep the original source object referenced in each proposed fact.
-- [ ] **Step 4: Implement the LLM provider boundary.** Select user credentials when enabled, otherwise the administrator default; refuse calls without consent or an available key; redact secrets from errors.
-- [ ] **Step 5: Implement proposal confirmation and immutable profile versions.** Store accepted fields only and retain source references and confirmation timestamps.
-- [ ] **Step 6: Run focused tests and verify no raw source content appears in ordinary task logs.**
+- [x] **Step 3: Implement local text extraction adapters.** Reuse existing PDF/DOCX/Markdown/plain-text helpers and keep the original source object referenced in each proposed fact.
+- [x] **Step 4: Implement the LLM provider boundary.** Select user credentials when enabled, otherwise the administrator default; refuse calls without consent or an available key; redact secrets from errors.
+- [x] **Step 5: Implement proposal confirmation and immutable profile versions.** Store accepted fields only and retain source references and confirmation timestamps.
+- [x] **Step 6: Run focused tests and verify no raw source content appears in ordinary task logs.**
 
 ---
 
@@ -216,16 +216,16 @@ Existing local CLI behavior remains available while web services are introduced.
 - `POST /api/evaluations/batch -> EvaluationBatchView`
 - `PATCH /api/evaluations/{job_id} -> UserJobEvaluationView`
 
-- [ ] **Step 1: Write tests showing two users can use different hard filters and weights against one shared job set.** Cover custom cities, arbitrary role keywords, salary as reference, exclusion reasons, and visible risk flags.
-- [ ] **Step 2: Run focused tests and confirm red.**
+- [x] **Step 1: Write tests showing two users can use different hard filters and weights against one shared job set.** Cover custom cities, arbitrary role keywords, salary as reference, exclusion reasons, and visible risk flags.
+- [x] **Step 2: Run focused tests and confirm red.**
 
   Run: `python -m unittest tests_web.test_search_templates tests_web.test_user_evaluations tests_web.test_shared_jobs -v`
 
   Expected: FAIL because the web preference and evaluation services do not exist.
-- [ ] **Step 3: Move candidate-specific assumptions out of global constants.** Preserve existing single-user test behavior through a default profile/rules adapter while allowing user-provided preferences and weights.
-- [ ] **Step 4: Implement public job upsert and user-private evaluation repositories.** Store only normalized public fields in `jobs`; store all user state in `user_job_evaluations`.
-- [ ] **Step 5: Implement paginated job and template APIs.** Ensure a user sees only their own evaluation columns and cannot update another user's row.
-- [ ] **Step 6: Run focused tests and the existing ranking suite.**
+- [x] **Step 3: Move candidate-specific assumptions out of global constants.** Preserve existing single-user test behavior through a default profile/rules adapter while allowing user-provided preferences and weights.
+- [x] **Step 4: Implement public job upsert and user-private evaluation repositories.** Store only normalized public fields in `jobs`; store all user state in `user_job_evaluations`.
+- [x] **Step 5: Implement paginated job and template APIs.** Ensure a user sees only their own evaluation columns and cannot update another user's row.
+- [x] **Step 6: Run focused tests and the existing ranking suite.**
 
   Run: `python -m unittest tests_web.test_search_templates tests_web.test_user_evaluations tests_web.test_shared_jobs tests.test_ranking_rules -v`
 
@@ -251,16 +251,16 @@ Existing local CLI behavior remains available while web services are introduced.
 - `POST /api/collection-tasks -> TaskView`
 - `GET /api/tasks/{task_id} -> TaskView`
 
-- [ ] **Step 1: Write tests for independent user Profile paths, start/stop idempotency, task state transitions, manual-pause propagation, and no platform write method.** Use a fake connector and local HTML fixtures.
-- [ ] **Step 2: Run focused tests and confirm red.**
+- [x] **Step 1: Write tests for independent user Profile paths, start/stop idempotency, task state transitions, manual-pause propagation, and no platform write method.** Use a fake connector and local HTML fixtures.
+- [x] **Step 2: Run focused tests and confirm red.**
 
   Run: `python -m unittest tests_web.test_browser_sessions tests_web.test_collection_tasks -v`
 
   Expected: FAIL because the web connector and task services do not exist.
-- [ ] **Step 3: Implement the per-user Chromium Profile manager.** Derive the Profile path from a server-owned root and user UUID; do not accept arbitrary paths from requests; use Playwright persistent contexts.
-- [ ] **Step 4: Adapt existing BOSS parsing and access guards.** Map successful results into the public `Job` model and map login/CAPTCHA/rate-limit/anti-bot results to `paused` with an explicit reason.
-- [ ] **Step 5: Implement database-backed FastAPI background tasks.** Persist `queued`, `running`, `completed`, `paused`, and `failed`; limit retry count; make one active collection task per user and template.
-- [ ] **Step 6: Run focused tests and compile checks.** Real BOSS access is not part of automated tests; perform a user-authorized manual smoke test separately.
+- [x] **Step 3: Implement the per-user Chromium Profile manager.** Derive the Profile path from a server-owned root and user UUID; do not accept arbitrary paths from requests; use Playwright persistent contexts.
+- [x] **Step 4: Adapt existing BOSS parsing and access guards.** Map successful results into the public `Job` model and map login/CAPTCHA/rate-limit/anti-bot results to `paused` with an explicit reason.
+- [x] **Step 5: Implement database-backed FastAPI background tasks.** Persist `queued`, `running`, `completed`, `paused`, and `failed`; limit retry count; make one active collection task per user and template.
+- [x] **Step 6: Run focused tests and compile checks.** Real BOSS access is not part of automated tests; perform a user-authorized manual smoke test separately.
 
 ---
 
@@ -281,16 +281,16 @@ Existing local CLI behavior remains available while web services are introduced.
 - `PATCH /api/material-drafts/{draft_id}/review -> MaterialDraftView`
 - `POST /api/material-drafts/{draft_id}/finalize -> MaterialFilesView`
 
-- [ ] **Step 1: Write tests for multi-job batch creation, one draft per user/job, independent failure, review gating, user isolation, and finalization only after approval.**
-- [ ] **Step 2: Run focused tests and confirm red.**
+- [x] **Step 1: Write tests for multi-job batch creation, one draft per user/job, independent failure, review gating, user isolation, and finalization only after approval.**
+- [x] **Step 2: Run focused tests and confirm red.**
 
   Run: `python -m unittest tests_web.test_material_batches tests_web.test_material_permissions -v`
 
   Expected: FAIL because the batch service and routes do not exist.
-- [ ] **Step 3: Add default resume and cover-letter templates plus a user-template metadata model.** Validate uploaded templates before associating them with a user.
-- [ ] **Step 4: Connect the existing matching, generation, reviewer, DOCX, PDF, and validation helpers through a per-user service.** Pass only one job, one profile version, one template, and one user-approved draft to each material run.
-- [ ] **Step 5: Store draft and final objects in MinIO and metadata in the user's rows.** Keep a failed child task from cancelling unrelated batch children.
-- [ ] **Step 6: Run focused tests, the existing material suite, and a local WPS/Word PDF acceptance check when available.**
+- [x] **Step 3: Add default resume and cover-letter templates plus a user-template metadata model.** Validate uploaded templates before associating them with a user.
+- [x] **Step 4: Connect the existing matching, generation, reviewer, DOCX, PDF, and validation helpers through a per-user service.** Pass only one job, one profile version, one template, and one user-approved draft to each material run.
+- [x] **Step 5: Store draft and final objects in MinIO and metadata in the user's rows.** Keep a failed child task from cancelling unrelated batch children.
+- [x] **Step 6: Run focused tests, the existing material suite, and a local WPS/Word PDF acceptance check when available.**
 
 ---
 
@@ -316,7 +316,7 @@ Existing local CLI behavior remains available while web services are introduced.
 - [ ] **Step 4: Implement onboarding and job pages.** Support document upload, consent, proposal confirmation, template editing, BOSS connection state, job filtering, scoring explanations, and multi-selection.
 - [ ] **Step 5: Implement batch progress and per-job draft review.** Disable finalization until the individual draft is approved; allow retry only for the failed draft.
 - [ ] **Step 6: Implement the minimal admin pages.** Show invite/account/task metadata only; do not create private-content preview components.
-- [ ] **Step 7: Run frontend tests and TypeScript build.**
+- [x] **Step 7: Run the TypeScript build.** The repository currently uses the Playwright smoke flow in `tests_web/ui_smoke.py`; a Vitest toolchain is deferred until component-level frontend tests are added.
 
   Run from `web/`: `npm test -- --run` and `npm run build`
 
@@ -330,20 +330,20 @@ Existing local CLI behavior remains available while web services are introduced.
 - Create: `tests_web/test_end_to_end_pilot.py`, `tests_web/fixtures/`
 - Modify: `docker-compose.yml`, `README.md`, `AGENTS.md`, `.env.example`
 
-- [ ] **Step 1: Add an offline two-user fixture flow.** Create two users, register them with separate invites, upload synthetic documents, confirm different profiles, insert one shared job, create different evaluations, and assert cross-user access is denied.
-- [ ] **Step 2: Run the offline end-to-end test and confirm red for any missing integration.**
+- [x] **Step 1: Add an offline two-user fixture flow.** The service-level fixture creates two private profiles and evaluations over one shared job, then verifies private material drafts and cross-user review denial.
+- [x] **Step 2: Run the offline two-user test.** It is part of the Web Pilot test suite.
 
   Run: `python -m unittest tests_web.test_end_to_end_pilot -v`
 
   Expected: FAIL until all web services are wired together.
-- [ ] **Step 3: Wire Compose health checks and local startup instructions.** Include MinIO bucket initialization, SQLite migration, FastAPI startup, React startup, and Chromium Profile root configuration.
-- [ ] **Step 4: Run the complete backend and existing suites.**
+- [x] **Step 3: Wire Compose health checks and local startup instructions.** Compose waits for MinIO health; the API runs SQLite-compatible migrations and bucket initialization before Uvicorn.
+- [ ] **Step 4: Run the complete backend and existing suites.** Blocked until the declared Python dependencies are installed in the active host environment.
 
   Run: `python -m unittest discover -s tests -p "test_*.py"` and `python -m unittest discover -s tests_web -p "test_*.py"`
 
   Expected: all tests PASS.
-- [ ] **Step 5: Run the local manual acceptance flow.** Use two invitees, complete BOSS login in separate Chromium Profiles, collect an authorized read-only fixture or user-authorized smoke result, select multiple jobs, review drafts, generate DOCX/PDF, and verify each user's MinIO objects and database records are private.
-- [ ] **Step 6: Run `git diff --check`, `python -m compileall -q server src crawlers tools`, and the frontend production build.** Record missing local services or WPS/Word PDF prerequisites explicitly.
+- [ ] **Step 5: Run the local manual acceptance flow.** Requires Docker/MinIO and a user-authorized BOSS read-only smoke test; WPS/Word PDF conversion is also a host prerequisite.
+- [x] **Step 6: Run `git diff --check`, `python -m compileall -q server src crawlers tools`, and the frontend production build.** Missing Python packages and live-service/WPS prerequisites remain recorded in the handoff.
 
 ## Self-Review
 

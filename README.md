@@ -47,4 +47,34 @@ PDF 输出还需要本机安装 LibreOffice，并确保 `soffice` 在 PATH 中�
 python -m unittest discover -s tests -p "test_*.py" -v
 ```
 
+## Multi-user web pilot
+
+The multi-user pilot uses FastAPI, React, SQLite, and MinIO. It is invite-only and private by default.
+
+Start the local services with:
+
+```powershell
+docker compose up --build
+```
+
+The API container runs `alembic upgrade head` and initializes the configured bucket before starting Uvicorn. The API health endpoint is `http://localhost:8000/api/health`; the React app is `http://localhost:5173`; the MinIO console is `http://localhost:9001`.
+
+For a direct host run, install the declared dependencies, create the runtime directory, run the migration, then start the API:
+
+```powershell
+python -m pip install -r requirements-dev.txt
+New-Item -ItemType Directory -Force runtime | Out-Null
+alembic upgrade head
+python -m server.bootstrap
+python -m uvicorn server.app:app --reload
+```
+
+The first administrator account and invitations are created through the local database/admin workflow. The web UI does not expose private content to administrators. Each invited user has an isolated profile, files, evaluations, material drafts, and Chromium profile; public job facts may be shared.
+
+Set `INITIAL_ADMIN_USERNAME` and `INITIAL_ADMIN_PASSWORD` in `.env` for the first local startup. The API creates that admin idempotently; leave the password out of tracked files. Set `MODEL_CREDENTIAL_KEY` to a generated Fernet key if users should be able to store their own model key. The UI only reports whether a key is configured and never returns the key.
+
+The first release supports BOSS read-only collection only. Login expiry, CAPTCHA, SMS verification, rate limiting, or anti-bot responses become a paused task that requires manual intervention. It does not upload resumes, submit applications, send platform messages, or reply to chats.
+
+Do not place model keys, passwords, cookies, or user files in tracked files. Set `DEFAULT_MODEL_KEY` through the environment when a cloud model is configured. `ai-job-search-master/` remains reference-only and is ignored by Git.
+
 测试使用脱敏或合成数据，不访问智联、BOSS 或邮箱。
